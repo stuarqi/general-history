@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<form action="#">
+  <p>
+    <input id="value" type="text" placeholder="Input value">
+    <button id="btn-push">Push</button>
+  </p>
+  <p>
+    <button id="btn-back" type="button">&lt;</button>
+    <button id="btn-forward" type="button">&gt;</button>
+  </p>
+</form>
+<div>
+  <select id="history-list" size="10" multiple style="width: 200px;"></select>
+</div>
+
+<script src="../dist/general-history.js"></script>
+<script>
+  var his = new GeneralHistory({stackLimit: 8});
+
+  var val = document.querySelector('#value');
+  var form = document.querySelector('form');
+  var btnBack = document.querySelector('#btn-back');
+  var btnForward = document.querySelector('#btn-forward');
+  var list = document.querySelector('#history-list');
+
+  function renderList () {
+    Array.from(list.children)
+      .forEach(option => list.removeChild(option));
+
+    let currentIndex = his.currentIndex;
+
+    his.list()
+      .forEach((item, idx) => {
+        let option = document.createElement('option');
+        option.innerHTML = item;
+        if (currentIndex === idx) {
+          option.selected = true;
+        }
+        list.appendChild(option);
+      });
+  }
+
+  function add (value) {
+    his.push(value);
+    renderList();
+  }
+
+  function onBack () {
+    if (his.canBack) {
+      val.value = his.back();
+      renderList();
+    }
+  }
+
+  function onForward () {
+    if (his.canForward) {
+      val.value = his.forward();
+      renderList();
+    }
+  }
+
+  form.addEventListener('submit', evt => {
+    evt.preventDefault();
+    add(val.value);
+    val.value = '';
+    val.focus();
+  }, false);
+
+  list.addEventListener('change', evt => {
+    val.value = his.locate(list.selectedIndex);
+  }, false);
+
+  btnBack.addEventListener('click', onBack, false);
+  btnForward.addEventListener('click', onForward, false);
+</script>
+</body>
+</html>
